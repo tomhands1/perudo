@@ -1,0 +1,45 @@
+
+.perudoContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 30px;
+}
+
+.buttonContainer {
+    display: flex;
+}
+
+.diceContainer {
+    display: flex;
+}
+
+.valueContainer {
+    display: flex;
+}
+
+.diceValue {
+    color: white;
+    font-size: 30px;
+    padding: 5px;
+}
+
+.perudoCup {
+	border-left: 40px solid transparent;
+    border-right: 40px solid transparent;
+    border-radius: 10px;
+	height: 0;
+    width: 250px;
+    color: white;
+    text-align: center;
+    font-size: 20px;
+    cursor: pointer;
+    .cupTitle {
+        margin-top: 200px;
+    }
+}
+
+.currentGuess {
+    color: white;
+    font-size: 30px;
+} 
