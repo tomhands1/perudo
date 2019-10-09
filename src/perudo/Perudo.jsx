@@ -1,10 +1,13 @@
-
+/* eslint-disable react/no-array-index-key */
+/* eslint-disable jsx-a11y/no-static-element-interactions */
+/* eslint-disable no-plusplus */
 import fp from 'lodash/fp';
 import React, {
     useState, useCallback, createRef, useEffect, useLayoutEffect
 } from 'react';
 import PropTypes from 'prop-types';
 
+import Shaker from './Shaker';
 import Button from '../common/button/Button';
 import Dice from './Dice';
 import styles from './Perudo.module.scss';
@@ -35,19 +38,19 @@ const Perudo = props => {
         getRefs();
         setRolled(true);
         rollDice();
-    }, [numOfDice, getRefs, rollDice]);
+    }, [numOfDice]);
 
     const reduceDice = useCallback(() => {
         setNumOfDice(numOfDice - 1);
         setRolls([]);
         getRefs();
         props.onLoseDice();
-    }, [numOfDice, props, getRefs]);
+    }, [numOfDice, props.onLoseDice]);
 
     const toggleHidden = useCallback(() => { setHidden(!hidden); }, [hidden]);
 
-    useEffect(() => { rollDice(); }, [rolled, rollDice]);
-    useLayoutEffect(() => { getRefs(); }, [numOfDice, getRefs]);
+    useEffect(() => { rollDice(); }, [rolled]);
+    useLayoutEffect(() => { getRefs(); }, [numOfDice]);
 
     return (
         <div className={styles.perudoContainer}>
@@ -76,15 +79,12 @@ const Perudo = props => {
                     </div>
                 )
                 : (
-                    <div
-                        className={styles.perudoCup}
-                        style={{ borderBottom: `300px solid ${props.faceColor}` }}
+                    <Shaker
+                        topColor={props.topColor}
+                        faceColor={props.faceColor}
+                        outlineColor={props.outlineColor}
                         onClick={readyForRoll}
-                    >
-                        <div className={styles.cupTitle}>
-                            <div className={styles.cupText} style={{ color: `${props.dotColor}` }}>Roll the Dice!</div>
-                        </div>
-                    </div>
+                    />
                 )}
             <div className={styles.valueContainer} style={hidden ? { visibility: 'hidden' } : { visibility: 'unset' }}>
                 {rolls.map((value, i) => (
@@ -98,6 +98,7 @@ const Perudo = props => {
 Perudo.defaultProps = {
     dotColor: '#ffffff',
     faceColor: '#FF6347',
+    topColor: '#CF503A',
     outlineColor: '#8B0000',
     outline: false,
     numOfDice: 5,
@@ -108,6 +109,7 @@ Perudo.defaultProps = {
 Perudo.propTypes = {
     dotColor: PropTypes.string,
     faceColor: PropTypes.string,
+    topColor: PropTypes.string,
     outlineColor: PropTypes.string,
     outline: PropTypes.bool,
     numOfDice: PropTypes.number,

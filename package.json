@@ -3,6 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "lodash": "^4.17.15",
+    "mdbreact": "^4.21.0",
     "prop-types": "^15.7.2",
     "react": "^16.10.2",
     "react-dice-complete": "^1.2.0",

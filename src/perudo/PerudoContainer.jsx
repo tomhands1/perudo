@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback } from 'react';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
@@ -15,7 +14,11 @@ const PerudoContainer = ({ submitGuess, currentGuess, ...props }) => {
     const [quantity, setQuantity] = useState('');
     const [value, setValue] = useState('');
 
-    const submitBid = useCallback(() => { submitGuess({ quantity, value }); }, [quantity, value]);
+    const submitBid = useCallback(() => {
+        if ((quantity >= currentGuess.quantity && value > currentGuess.value) || (quantity > currentGuess.quantity)) {
+            submitGuess({ quantity, value });
+        } else alert('invalid guess');
+    }, [quantity, value]);
 
     return (
         numOfDice > 0 ? (
