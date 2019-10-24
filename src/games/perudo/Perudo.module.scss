@@ -1,0 +1,98 @@
+.perudoContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 30px;
+    .title {
+        font-size: 40px;
+        color: white;
+        text-decoration: underline;
+        padding-bottom: 20px;
+    }
+    .gameStarted {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        .gameContainer {
+            margin: 40px 0;
+            .insideCup {
+                width: 160px;
+                margin: 0 45px;
+                .diceContainer {
+                    width: 100%;
+                    :global(.dice) {
+                        position: absolute;
+                        top: 400px;
+                        :global(.die-container) {
+                            position: absolute;
+                            margin: 0;
+                        }
+                        :global(.die-container:nth-child(1)) {
+                            left: 100px;
+                            top: 0;
+                        }
+                        :global(.die-container:nth-child(2)) {
+                            left: 0;
+                            top: 100px;
+                        }
+                        :global(.die-container:nth-child(3)) {
+                            left: 100px;
+                            top: 100px;
+                        }
+                        :global(.die-container:nth-child(4)) {
+                            left: 0;
+                            top: 0;
+                        }
+                        :global(.die-container:nth-child(5)) {
+                            left: 50px;
+                            top: 50px;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+.guessContainer {
+    display: flex;
+    flex-direction: column;
+    .guessDropdowns {
+        display: flex;
+        flex-direction: row;
+    }
+}
+
+.buttonContainer {
+    display: flex;
+    justify-content: center;
+    margin-top: 40px;
+}
+
+.valueContainer {
+    display: flex;
+}
+
+.diceValue {
+    color: white;
+    font-size: 30px;
+    padding: 5px;
+}
+
+.currentGuess {
+    color: white;
+    font-size: 30px;
+}
+
+.readyToPlay {
+    color: green;
+}
+
+@media screen and (max-width: 600px) {
+    .gameContainer {
+        overflow-x: hidden;
+        width: 100%;
+        padding: 20px 12.5%;
+        margin: 10px 0;
+    }
+}

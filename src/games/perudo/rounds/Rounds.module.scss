@@ -1,0 +1,16 @@
+.roundsContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    .headerContainer {
+        font-size: 150%;
+        .primaryHeader {
+            font-size: 75%;
+        }
+    }
+    .secondaryHeader {
+        margin-top: 30px;
+        margin-bottom: 10px;
+    }
+}

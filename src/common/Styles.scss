@@ -1,0 +1,41 @@
+$font-size-gigantic: 40px;
+$font-size-huge: 24px;
+$font-size-large: 20px;
+$font-size-medium: 16px;
+$font-size-small: 14px;
+$font-size-tiny: 12px;
+
+$color-white: white;
+$color-black: black;
+$color-green: green;
+$color-light-green: #00C851;
+$color-dark-green: #007E33;
+$color-amber: #ffa000;
+$color-amber-dark: #774c02;
+$color-blue: #4285f4;
+$color-light-blue: #78a5ee;
+$color-danger-red: #CC0000;
+$color-info: #0099CC;
+$color-warning: #FF8800;
+$color-elegant-dark: #212121;
+
+$profile-hover: #686585;
+$profile-sidebar-text: #00C851;
+
+$spacing-massive: 70px;
+$spacing-huge: 50px;
+$spacing-large: 40px;
+$spacing-medium: 30px;
+$spacing-small: 10px;
+$spacing-tiny: 5px;
+
+$normal-transition: 0.5s;
+
+$font-family: "Courier New", Courier, monospace;
+$font-weight-normal: 400;
+
+@mixin vertical-center-div() {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
