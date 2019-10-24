@@ -48,7 +48,7 @@ const PerudoContainer = ({
     },
     [props.startGame, props.gameId]);
 
-    const activePlayer = fp.get('name')(Object.values(props.players).find(x => x.playerNumber === props.game.activePlayerNum));
+    const activePlayer = fp.get('name')(Object.values(props.players).find(x => fp.get('playerNumber')(x) === props.game.activePlayerNum));
 
     const playerNum = fp.get('playerNumber')(Object.values(props.players).find(x => x.id === props.auth.uid));
     const rolled = fp.get('rolled')(Object.values(props.players).find(x => x.id === props.auth.uid));
@@ -212,8 +212,29 @@ PerudoContainer.defaultProps = {
     shakerUp: false,
     rolling: false,
     toggleShaker: fp.noop,
-    game: {},
-    players: {},
+    game: {
+        creator: {
+            id: '',
+            name: ''
+        },
+        game_started: false,
+        name: '',
+        activePlayerNum: 1,
+        currentBid: {
+            quantity: 0,
+            value: 0
+        },
+        round: 1
+    },
+    players: {
+        '': {
+            id: '',
+            name: '',
+            numOfDice: 5,
+            readyToPlay: false,
+            rolled: false
+        }
+    },
     diceRolled: {},
     gameId: '',
     readyToPlay: fp.noop,
@@ -253,7 +274,7 @@ export default compose(
     connect(mapStateToProps, mapDispatchToProps),
     firestoreConnect(props => [
         {
-            collection: 'available_games',
+            collection: 'games',
             doc: getGameId(props),
             subcollections: [
                 { collection: 'players' }
@@ -261,11 +282,11 @@ export default compose(
             storeAs: 'players'
         },
         {
-            collection: 'available_games',
+            collection: 'games',
             doc: getGameId(props)
         },
         {
-            collection: 'available_games',
+            collection: 'games',
             doc: getGameId(props),
             subcollections: [
                 { collection: 'diceRolled' }

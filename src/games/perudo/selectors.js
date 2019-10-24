@@ -21,7 +21,7 @@ export const getGameId = props => fp.flow(
 export const getGame = (state, props) => fp.flow(
     fp.get('firestore'),
     fp.get('data'),
-    fp.get('available_games'),
+    fp.get('games'),
     fp.get(getGameId(props))
 )(state);
 

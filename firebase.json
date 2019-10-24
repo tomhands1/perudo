@@ -1,5 +1,6 @@
 {
     "hosting": {
+        "site": "perudo-sl",
         "public": "build",
         "ignore": [
             "firebase.json",

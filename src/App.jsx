@@ -20,7 +20,6 @@ import defaultStyles from './App.module.scss';
 import NewNavbar from './navbar/NewNavbar';
 import CreateGame from './games/creategame/CreateGame';
 import JoinGame from './games/joingame/JoinGame';
-import Cards from './games/Cards';
 import Perudo from './games/perudo/PerudoContainer';
 
 const App = props => (
@@ -37,8 +36,6 @@ const App = props => (
                             <AuthenticatedRoute exact path="/profile" component={Profile} />
                             <AuthenticatedRoute exact path="/join-game" component={JoinGame} />
                             <AuthenticatedRoute exact path="/create-game" component={CreateGame} />
-                            <AuthenticatedRoute exact path="/cards" component={Cards} />
-                            <AuthenticatedRoute exact path="/perudo" component={Perudo} />
                             <AuthenticatedRoute exact path="/game/:gameId" component={Perudo} />
                             <UnauthenticatedRoute path="/sign-in" component={SignIn} redirect="/dashboard" />
                             <UnauthenticatedRoute path="/sign-up" component={SignUp} redirect="/dashboard" />

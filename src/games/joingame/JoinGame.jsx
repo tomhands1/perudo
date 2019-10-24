@@ -171,7 +171,7 @@ JoinGame.propTypes = {
 };
 
 const mapStateToProps = state => {
-    const games = state.firestore.data.available_games;
+    const {games} = state.firestore.data;
     return {
         games
     };
@@ -184,6 +184,6 @@ const mapDispatchToProps = {
 export default compose(
     connect(mapStateToProps, mapDispatchToProps),
     firestoreConnect([{
-        collection: 'available_games'
+        collection: 'games'
     }])
 )(JoinGame);

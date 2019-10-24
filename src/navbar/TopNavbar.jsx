@@ -10,7 +10,8 @@ import MenuItem from '@material-ui/core/MenuItem';
 import Menu from '@material-ui/core/Menu';
 import PropTypes from 'prop-types';
 import { noop } from 'lodash';
-import classNames from 'classnames';
+
+
 import defaultStyles from './TopNavbar.module.scss';
 
 const useStyles = makeStyles(theme => ({
@@ -45,7 +46,6 @@ const TopNavbar = props => {
 
     return (
         <AppBar
-            // position="fixed"
             className={props.styles.topNavbar}
         >
             <Toolbar>
@@ -53,7 +53,7 @@ const TopNavbar = props => {
                     <MenuIcon />
                 </IconButton>
                 <Typography variant="h6" className={classes.title}>
-                        Duzza Games
+                    Perudo
                 </Typography>
                 <div>
                     <IconButton

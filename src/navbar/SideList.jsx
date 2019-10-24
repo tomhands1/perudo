@@ -7,8 +7,6 @@ import ListItemText from '@material-ui/core/ListItemText';
 import InboxIcon from '@material-ui/icons/MoveToInbox';
 import FlashOnIcon from '@material-ui/icons/FlashOn';
 import ShuffleIcon from '@material-ui/icons/Shuffle';
-import CardIcon from '@material-ui/icons/CropPortrait';
-import DiceIcon from '@material-ui/icons/Casino';
 import PropTypes from 'prop-types';
 import { noop } from 'lodash';
 
@@ -22,16 +20,6 @@ const sidebarLinks = [
         title: 'Create Game',
         redirect: '/create-game',
         component: <ShuffleIcon />
-    },
-    {
-        title: 'Cards',
-        redirect: '/cards',
-        component: <CardIcon />
-    },
-    {
-        title: 'Perudo',
-        redirect: '/perudo',
-        component: <DiceIcon />
     }
 ];
 

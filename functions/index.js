@@ -15,7 +15,7 @@ exports.createGame = functions
     .https.onCall((data, context) => {
         common.isAuthenticated(context);
 
-        const gameWithThatName = db.collection('available_games')
+        const gameWithThatName = db.collection('games')
             .where('name', '==', data.name);
 
         const getDisplayName = id => db.collection('users').doc(id).get().then(user => user.data().displayName);
@@ -23,7 +23,7 @@ exports.createGame = functions
         return getDisplayName(context.auth.uid).then(displayName => gameWithThatName.get()
             .then(doc => {
                 if (doc.empty) {
-                    return db.collection('available_games').add({
+                    return db.collection('games').add({
                         name: data.name,
                         creator: {
                             id: context.auth.uid,
@@ -33,13 +33,13 @@ exports.createGame = functions
                         activePlayerNum: 1,
                         numberOfPlayers: 1
                     }).then(result => {
-                        db.collection('available_games').doc(result.id).collection('players').add({
+                        db.collection('games').doc(result.id).collection('players').add({
                             id: context.auth.uid,
                             name: displayName,
                             readyToPlay: false,
                             numOfDice: 5
                         });
-                        return db.collection('available_games').doc(result.id).get().then(docs => ({ ...docs.data(), id: docs.id }));
+                        return db.collection('games').doc(result.id).get().then(docs => ({ ...docs.data(), id: docs.id }));
                     });
                 }
                 throw new functions.https.HttpsError('already-exists', 'A game with that name already exists');
@@ -52,9 +52,9 @@ exports.joinGame = functions
     .https.onCall((data, context) => {
         common.isAuthenticated(context);
 
-        const playerInGame = db.collection('available_games').doc(data.gameId).collection('players').where('id', '==', context.auth.uid);
+        const playerInGame = db.collection('games').doc(data.gameId).collection('players').where('id', '==', context.auth.uid);
 
-        const gameWithThatId = db.collection('available_games').doc(data.gameId).collection('players');
+        const gameWithThatId = db.collection('games').doc(data.gameId).collection('players');
 
         const getDisplayName = id => db.collection('users').doc(id).get().then(user => user.data().displayName);
 
@@ -68,7 +68,7 @@ exports.joinGame = functions
                 readyToPlay: false,
                 numOfDice: 5
             }));
-        }).then(() => db.collection('available_games').doc(data.gameId).update({
+        }).then(() => db.collection('games').doc(data.gameId).update({
             numberOfPlayers: admin.firestore.FieldValue.increment(1)
         }));
     });
@@ -77,7 +77,7 @@ exports.readyUp = functions
     .region('europe-west2')
     .https.onCall((data, context) => {
         common.isAuthenticated(context);
-        const playerInGame = db.collection('available_games').doc(data.gameId).collection('players').where('id', '==', context.auth.uid);
+        const playerInGame = db.collection('games').doc(data.gameId).collection('players').where('id', '==', context.auth.uid);
         return playerInGame.get().then(result => {
             if (result.size > 1) {
                 throw new functions.https.HttpsError('invalid-argument', 'You are in that game twice');
@@ -94,12 +94,12 @@ exports.startGame = functions
     .region('europe-west2')
     .https.onCall((data, context) => {
         common.isAuthenticated(context);
-        const playersNotReady = db.collection('available_games').doc(data.gameId).collection('players').where('readyToPlay', '==', false);
+        const playersNotReady = db.collection('games').doc(data.gameId).collection('players').where('readyToPlay', '==', false);
         return playersNotReady.get().then(result => {
             if (result.size > 0) {
                 throw new functions.https.HttpsError('invalid-argument', 'Not all players are ready to play');
             }
-            return db.collection('available_games').doc(data.gameId).update({
+            return db.collection('games').doc(data.gameId).update({
                 game_started: true,
                 currentBid: {
                     quantity: 0,
@@ -107,7 +107,7 @@ exports.startGame = functions
                 },
                 round: 1
             });
-        }).then(() => db.collection('available_games').doc(data.gameId).collection('players').get()
+        }).then(() => db.collection('games').doc(data.gameId).collection('players').get()
             .then(
                 result => result.docs.forEach((doc, index) => doc.ref.update({
                     playerNumber: index + 1
@@ -142,11 +142,11 @@ exports.submitGuess = functions
     .region('europe-west2')
     .https.onCall((data, context) => {
         common.isAuthenticated(context);
-        return db.collection('available_games').doc(data.gameId).get().then(
+        return db.collection('games').doc(data.gameId).get().then(
             result => (result.data())
         )
             .then(
-                gameObj => db.collection('available_games').doc(data.gameId).collection('players').where('id', '==', context.auth.uid)
+                gameObj => db.collection('games').doc(data.gameId).collection('players').where('id', '==', context.auth.uid)
                     .get()
                     .then(
                         result => {
@@ -166,7 +166,7 @@ exports.submitGuess = functions
                             throw new functions.https.HttpsError('invalid-argument', `Your bid of ${data.bid} is less than ${gameObj.currentBid}`);
                         }
                     })
-                    .then(() => db.collection('available_games').doc(data.gameId).update({
+                    .then(() => db.collection('games').doc(data.gameId).update({
                         currentBid: {
                             quantity: data.bid.quantity,
                             value: data.bid.value,
@@ -182,7 +182,7 @@ exports.rollDice = functions
     .https.onCall((data, context) => {
         common.isAuthenticated(context);
 
-        return db.collection('available_games').doc(data.gameId).collection('players').where('id', '==', context.auth.uid)
+        return db.collection('games').doc(data.gameId).collection('players').where('id', '==', context.auth.uid)
             .get()
             .then(player => {
                 if (player.size > 1) {
@@ -200,14 +200,14 @@ exports.rollDice = functions
                     for (let i = 0; i < numDice; i++) {
                         diceArray.push(fp.random(1, 6));
                     }
-                    return db.collection('available_games').doc(data.gameId).collection('diceRolled').where('userId', '==', context.auth.uid)
+                    return db.collection('games').doc(data.gameId).collection('diceRolled').where('userId', '==', context.auth.uid)
                         .get()
                         .then(
                             result => {
                                 if (result.size > 1) {
                                     throw new functions.https.HttpsError('invalid-argument', 'You have multiple rolls for the same game');
                                 } else if (result.size === 0) {
-                                    db.collection('available_games').doc(data.gameId).collection('diceRolled').add({
+                                    db.collection('games').doc(data.gameId).collection('diceRolled').add({
                                         userId: context.auth.uid,
                                         currentRoll: diceArray
                                     });
@@ -219,12 +219,12 @@ exports.rollDice = functions
                                     });
                                 }
                                 if (result.size <= 1) {
-                                    db.collection('available_games').doc(data.gameId).collection('allRolls').get()
+                                    db.collection('games').doc(data.gameId).collection('allRolls').get()
                                         .then(query => {
                                             if (query.size > 1) {
                                                 throw new functions.https.HttpsError('invalid-argument', 'Server Error. Should just be 1 set of rolls per game');
                                             } else if (query.size === 0) {
-                                                db.collection('available_games').doc(data.gameId).collection('allRolls').add({
+                                                db.collection('games').doc(data.gameId).collection('allRolls').add({
                                                     1: diceArray.filter(x => x === 1).length,
                                                     2: diceArray.filter(x => x === 2).length,
                                                     3: diceArray.filter(x => x === 3).length,
@@ -270,7 +270,7 @@ exports.callNo = functions
         common.isAuthenticated(context);
 
 
-        const removeDiceFromPlayer = playerNumber => db.collection('available_games').doc(data.gameId).collection('players')
+        const removeDiceFromPlayer = playerNumber => db.collection('games').doc(data.gameId).collection('players')
             .where('playerNumber', '==', playerNumber)
             .get()
             .then(
@@ -289,7 +289,7 @@ exports.callNo = functions
             .then(
                 () => {
                     // Reset game bid
-                    db.collection('available_games').doc(data.gameId).update({
+                    db.collection('games').doc(data.gameId).update({
                         activePlayerNum: playerNumber,
                         currentBid: {
                             playerNumber: null,
@@ -302,11 +302,11 @@ exports.callNo = functions
             );
 
 
-        return db.collection('available_games').doc(data.gameId).get().then(
+        return db.collection('games').doc(data.gameId).get().then(
             result => result.data()
         )
             .then(
-                currentGame => db.collection('available_games').doc(data.gameId).collection('allRolls').get()
+                currentGame => db.collection('games').doc(data.gameId).collection('allRolls').get()
                     .then(
                         allRolls => {
                             if (allRolls.size === 0) {
@@ -346,7 +346,7 @@ exports.callExact = functions
         common.isAuthenticated(context);
 
 
-        const updateDiceForPlayer = (playerNumber, increment) => db.collection('available_games').doc(data.gameId).collection('players')
+        const updateDiceForPlayer = (playerNumber, increment) => db.collection('games').doc(data.gameId).collection('players')
             .where('playerNumber', '==', playerNumber)
             .get()
             .then(
@@ -365,7 +365,7 @@ exports.callExact = functions
             .then(
                 () => {
                     // Reset game bid
-                    db.collection('available_games').doc(data.gameId).update({
+                    db.collection('games').doc(data.gameId).update({
                         activePlayerNum: playerNumber,
                         currentBid: {
                             playerNumber: null,
@@ -378,11 +378,11 @@ exports.callExact = functions
             );
 
 
-        return db.collection('available_games').doc(data.gameId).get().then(
+        return db.collection('games').doc(data.gameId).get().then(
             result => result.data()
         )
             .then(
-                currentGame => db.collection('available_games').doc(data.gameId).collection('allRolls').get()
+                currentGame => db.collection('games').doc(data.gameId).collection('allRolls').get()
                     .then(
                         allRolls => {
                             if (allRolls.size === 0) {
@@ -403,20 +403,47 @@ exports.callExact = functions
     });
 
 
-exports.resetGameState = functions.region('europe-west2').firestore
-    .document('available_games/{id}')
+// exports.resetGameState = functions.region('europe-west2').firestore
+//     .document('games/{id}')
+//     .onWrite((change, context) => {
+//         if (change.before.data() !== null && change.before.data().round < change.after.data().round) {
+
+//             // Set all players rolled to false
+//             db.collection('games').doc(context.params.id).collection('players').get()
+//                 .then(
+//                     players => players.docs.forEach(x => {
+//                         console.log('into the players');
+//                         x.ref.update({
+//                             rolled: false
+//                         });
+//                     })
+//                 );
+//             // Reset all players rolls
+//             db.collection('games').doc(context.params.id).collection('diceRolled').get()
+//                 .then(
+//                     diceRolled => diceRolled.docs.forEach(doc => {
+//                         console.log('into the players');
+//                         doc.ref.update({
+//                             currentRoll: []
+//                         });
+//                     })
+//                 );
+//         }
+//         return Promise.resolve();
+//     });
+
+exports.resetRolls = functions.region('europe-west2').firestore
+    .document('games/{id}')
     .onWrite((change, context) => {
         if (change.before.data() !== null && change.before.data().round < change.after.data().round) {
-            // Resetting server roll
-            db.collection('available_games').doc(context.params.id).collection('allRolls').get()
+            return db.collection('games').doc(context.params.id).collection('allRolls').get()
                 .then(allRolls => {
                     if (allRolls.size === 0) {
                         throw new functions.https.HttpsError('not-found', 'There are no rolls');
                     } else if (allRolls.size > 1) {
                         throw new functions.https.HttpsError('invalid-argument', 'Too many rolls exist');
                     } else {
-                        console.log('into the rolls');
-                        allRolls.docs[0].ref.update({
+                        return allRolls.docs[0].ref.update({
                             1: 0,
                             2: 0,
                             3: 0,
@@ -426,26 +453,30 @@ exports.resetGameState = functions.region('europe-west2').firestore
                         });
                     }
                 });
-            // Set all players rolled to false
-            db.collection('available_games').doc(context.params.id).collection('players').get()
-                .then(
-                    players => players.docs.forEach(x => {
-                        console.log('into the players');
-                        x.ref.update({
-                            rolled: false
-                        });
-                    })
-                );
-            // Reset all players rolls
-            db.collection('available_games').doc(context.params.id).collection('diceRolled').get()
-                .then(
-                    diceRolled => diceRolled.docs.forEach(doc => {
-                        console.log('into the players');
-                        doc.ref.update({
-                            currentRoll: []
-                        });
-                    })
-                );
+        }
+        return Promise.resolve();
+    });
+
+exports.resetPlayers = functions.region('europe-west2').firestore
+    .document('games/{id}')
+    .onWrite((change, context) => {
+        if (change.before.data() !== null && change.before.data().round < change.after.data().round) {
+            return db.collection('games').doc(context.params.id).collection('players').get()
+                .then(players => players.docs.forEach(x => x.ref.update({
+                    rolled: false
+                })));
+        }
+        return Promise.resolve();
+    });
+
+exports.resetPlayerRolls = functions.region('europe-west2').firestore
+    .document('games/{id}')
+    .onWrite((change, context) => {
+        if (change.before.data() !== null && change.before.data().round < change.after.data().round) {
+            return db.collection('games').doc(context.params.id).collection('diceRolled').get()
+                .then(diceRolled => diceRolled.docs.forEach(doc => doc.ref.update({
+                    currentRoll: []
+                })));
         }
         return Promise.resolve();
     });

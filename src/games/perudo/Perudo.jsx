@@ -31,11 +31,10 @@ const Perudo = props => {
     const color = useMemo(() => colors.find(x => x.id === props.playerNum), [props.playerNum]);
 
     useEffect(() => {
-        if (props.diceFetched) {
+        if (props.diceFetched && props.rolled) {
             diceRef.current.rollAll(props.diceArray);
         }
-    }, [props.rolled, props.diceArray]);
-    console.log(props);
+    }, [props.rolled, props.diceFetched, props.diceArray]);
 
     return (
         <div className={styles.gameContainer}>
