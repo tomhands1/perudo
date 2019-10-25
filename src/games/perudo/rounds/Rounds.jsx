@@ -12,7 +12,6 @@ const Rounds = props => (
             <div className={styles.secondaryHeader}>Are you ready to play Perudo?</div>
             <div className={styles.buttonContainer}>
                 <StyledButton onClick={props.startRound} text="Yes" color="green" />
-                <StyledButton onClick={() => console.log('Rage quit')} text="Quit Game" color="red" />
             </div>
         </div>
     ) : (
@@ -26,7 +25,6 @@ const Rounds = props => (
             <div className={styles.secondaryHeader}>Are you ready to start the next round?</div>
             <div className={styles.buttonContainer}>
                 <StyledButton onClick={props.startRound} text="Yes" color="green" />
-                <StyledButton onClick={() => console.log('Rage quit')} text="Quit Game" color="red" />
             </div>
         </div>
     )
@@ -35,12 +33,14 @@ const Rounds = props => (
 Rounds.propTypes = {
     activePlayer: PropTypes.string,
     startRound: PropTypes.func,
+    quitGame: PropTypes.func,
     round: PropTypes.number.isRequired
 };
 
 Rounds.defaultProps = {
     activePlayer: '',
-    startRound: fp.noop
+    startRound: fp.noop,
+    quitGame: fp.noop
 };
 
 export default Rounds;

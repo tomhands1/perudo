@@ -5,9 +5,9 @@
 
 .perudoCupActive {
     -webkit-animation-name: shake;
-    -webkit-animation-duration: 2s;
+    -webkit-animation-duration: 0.8s;
     animation-name: shake;
-    animation-duration: 2s;
+    animation-duration: 0.8s;
     animation-fill-mode: forwards;
 }
 
@@ -37,9 +37,9 @@
 
 .perudoCupReset {
     -webkit-animation-name: reset;
-    -webkit-animation-duration: 2s;
+    -webkit-animation-duration: 0.8s;
     animation-name: reset;
-    animation-duration: 2s;
+    animation-duration: 0.8s;
     animation-fill-mode: forwards;
 }
 

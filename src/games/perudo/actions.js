@@ -29,6 +29,10 @@ export const START_GAME_ERROR = 'START_GAME_ERROR';
 
 export const NEW_ROUND = 'NEW_ROUND';
 
+export const QUIT_GAME = 'QUIT_GAME';
+export const QUIT_GAME_SUCCESS = 'QUIT_GAME_SUCCESS';
+export const QUIT_GAME_ERROR = 'QUIT_GAME_ERROR';
+
 export const callNo = gameId => ({
     type: CALL_NO,
     gameId
@@ -126,5 +130,19 @@ export const startGameSuccess = () => ({
 
 export const startGameError = error => ({
     type: START_GAME_ERROR,
+    error
+});
+
+export const quitGame = gameId => ({
+    type: QUIT_GAME,
+    gameId
+});
+
+export const quitGameSuccess = () => ({
+    type: QUIT_GAME_SUCCESS
+});
+
+export const quitGameError = error => ({
+    type: QUIT_GAME_ERROR,
     error
 });

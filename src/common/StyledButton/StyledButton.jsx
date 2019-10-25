@@ -11,6 +11,8 @@ const StyledButton = props => (
         onClick={props.onClick}
         type={props.type}
         disabled={props.disabled}
+        size={props.size}
+        floating={props.floating}
     >
         {props.text}
     </MDBBtn>
@@ -22,7 +24,9 @@ StyledButton.defaultProps = {
     styles: defaultStyles,
     text: 'Button',
     type: '',
-    disabled: false
+    disabled: false,
+    size: '',
+    floating: false
 };
 
 StyledButton.propTypes = {
@@ -31,7 +35,9 @@ StyledButton.propTypes = {
     styles: PropTypes.objectOf(PropTypes.string),
     text: PropTypes.string,
     type: PropTypes.string,
-    disabled: PropTypes.bool
+    disabled: PropTypes.bool,
+    size: PropTypes.string,
+    floating: PropTypes.bool
 };
 
 export default StyledButton;

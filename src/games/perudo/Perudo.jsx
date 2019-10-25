@@ -1,5 +1,3 @@
-/* eslint-disable react/no-array-index-key */
-/* eslint-disable jsx-a11y/no-static-element-interactions */
 import fp from 'lodash/fp';
 import React, {
     useCallback, useRef, useEffect, useMemo
@@ -20,12 +18,12 @@ const Perudo = props => {
 
     const readyForRoll = useCallback(() => {
         props.rollDice(props.gameId);
-        setTimeout(() => props.setHidden(false), 800);
+        setTimeout(() => props.setHidden(false), 300);
     }, [props]);
 
     const toggleShaker = useCallback(() => {
         props.toggleShaker();
-        setTimeout(() => props.setHidden(props.shakerUp), 800);
+        setTimeout(() => props.setHidden(props.shakerUp), props.hidden ? 300 : 150);
     }, [props]);
 
     const color = useMemo(() => colors.find(x => x.id === props.playerNum), [props.playerNum]);

@@ -13,3 +13,5 @@ export const startGame = request => functionToCall('startGame')(request);
 export const callNo = request => functionToCall('callNo')(request);
 
 export const callExact = request => functionToCall('callExact')(request);
+
+export const quitGame = request => functionToCall('quitGame')(request);
