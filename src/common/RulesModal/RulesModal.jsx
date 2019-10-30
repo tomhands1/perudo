@@ -16,6 +16,7 @@ const RulesModal = props => {
                 onClick={() => setOpen(true)}
                 text="Rules"
                 color="amber"
+                size="sm"
             />
             <Modal
                 open={open}

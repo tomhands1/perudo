@@ -1,15 +1,17 @@
 import { functionToCall } from '../../api/api';
 
-export const rollDice = request => functionToCall('rollDice')(request).then(
+export const rollDice = request => functionToCall('perudo-rollDice')(request).then(
     response => response.data
 );
 
-export const submitGuess = request => functionToCall('submitGuess')(request);
+export const submitGuess = request => functionToCall('perudo-submitGuess')(request);
 
-export const readyUp = request => functionToCall('readyUp')(request);
+export const readyUp = request => functionToCall('games-readyUp')(request);
 
-export const startGame = request => functionToCall('startGame')(request);
+export const startGame = request => functionToCall('games-startGame')(request);
 
-export const callNo = request => functionToCall('callNo')(request);
+export const callNo = request => functionToCall('perudo-callNo')(request);
 
-export const callExact = request => functionToCall('callExact')(request);
+export const callExact = request => functionToCall('perudo-callExact')(request);
+
+export const quitGame = request => functionToCall('games-quitGame')(request);

@@ -48,7 +48,9 @@ const PerudoContainer = ({
     },
     [props.startGame, props.gameId]);
 
-    const activePlayer = fp.get('name')(Object.values(props.players).find(x => x.playerNumber === props.game.activePlayerNum));
+    const leaveGame = useCallback(() => props.quitGame(props.gameId), [props.quitGame, props.gameId]);
+
+    const activePlayer = fp.get('name')(Object.values(props.players).find(x => fp.get('playerNumber')(x) === props.game.activePlayerNum));
 
     const playerNum = fp.get('playerNumber')(Object.values(props.players).find(x => x.id === props.auth.uid));
     const rolled = fp.get('rolled')(Object.values(props.players).find(x => x.id === props.auth.uid));
@@ -67,11 +69,10 @@ const PerudoContainer = ({
                         isOpen={isOpen}
                         backdrop
                     >
-                        <Rounds startRound={startRound} activePlayer={activePlayer} round={props.game.round} />
+                        <Rounds startRound={startRound} activePlayer={activePlayer} round={props.game.round} quitGame={leaveGame} />
                     </StyledModal>
                 )}
-                <div className={styles.title}>Perudo</div>
-                {props.game.game_started && (
+                {props.game.gameStarted && (
                     <div className={styles.gameStarted}>
                         <div className={styles.currentGuess}>
                             {props.game && props.game.currentBid.value > 0
@@ -126,10 +127,17 @@ const PerudoContainer = ({
                     && props.players
                     && fp.all('readyToPlay')(Object.values(props.players).map(player => player))
                     && props.game.creator.id === props.auth.uid
-                    && !props.game.game_started
+                    && !props.game.gameStarted
                     && <StyledButton text="Start Game!" onClick={startGame} />}
+                <Lobby
+                    players={props.players}
+                    readyUp={readyUp}
+                    userId={props.auth.uid}
+                    activePlayer={props.game.activePlayerNum}
+                    gameStarted={props.game.gameStarted}
+                />
                 <RulesModal rules={rules} title="Perudo" />
-                <Lobby players={props.players} readyUp={readyUp} userId={props.auth.uid} activePlayer={props.game.activePlayerNum} gameStarted={props.game.game_started} />
+                <StyledButton onClick={leaveGame} text="Quit" color="red" size="sm" />
             </div>
         )
             : (
@@ -166,7 +174,7 @@ PerudoContainer.propTypes = {
             id: PropTypes.string,
             name: PropTypes.string
         }),
-        game_started: PropTypes.bool,
+        gameStarted: PropTypes.bool,
         name: PropTypes.string,
         activePlayerNum: PropTypes.number,
         currentBid: PropTypes.shape({
@@ -194,7 +202,8 @@ PerudoContainer.propTypes = {
     readyToPlay: PropTypes.func,
     startGame: PropTypes.func,
     diceFetched: PropTypes.bool.isRequired,
-    newRound: PropTypes.func
+    newRound: PropTypes.func,
+    quitGame: PropTypes.func
 };
 
 PerudoContainer.defaultProps = {
@@ -212,13 +221,35 @@ PerudoContainer.defaultProps = {
     shakerUp: false,
     rolling: false,
     toggleShaker: fp.noop,
-    game: {},
-    players: {},
+    game: {
+        creator: {
+            id: '',
+            name: ''
+        },
+        gameStarted: false,
+        name: '',
+        activePlayerNum: 1,
+        currentBid: {
+            quantity: 0,
+            value: 0
+        },
+        round: 1
+    },
+    players: {
+        '': {
+            id: '',
+            name: '',
+            numOfDice: 5,
+            readyToPlay: false,
+            rolled: false
+        }
+    },
     diceRolled: {},
     gameId: '',
     readyToPlay: fp.noop,
     startGame: fp.noop,
-    newRound: fp.noop
+    newRound: fp.noop,
+    quitGame: fp.noop
 };
 
 const mapDispatchToProps = {
@@ -230,7 +261,8 @@ const mapDispatchToProps = {
     toggleShaker: actions.toggleShaker,
     readyToPlay: actions.readyToPlay,
     startGame: actions.startGame,
-    newRound: actions.newRound
+    newRound: actions.newRound,
+    quitGame: actions.quitGame
 };
 
 const mapStateToProps = (state, props) => ({
@@ -253,7 +285,7 @@ export default compose(
     connect(mapStateToProps, mapDispatchToProps),
     firestoreConnect(props => [
         {
-            collection: 'available_games',
+            collection: 'games',
             doc: getGameId(props),
             subcollections: [
                 { collection: 'players' }
@@ -261,11 +293,11 @@ export default compose(
             storeAs: 'players'
         },
         {
-            collection: 'available_games',
+            collection: 'games',
             doc: getGameId(props)
         },
         {
-            collection: 'available_games',
+            collection: 'games',
             doc: getGameId(props),
             subcollections: [
                 { collection: 'diceRolled' }

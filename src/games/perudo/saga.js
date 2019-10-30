@@ -1,6 +1,7 @@
 import {
     all, takeEvery, put, call
 } from 'redux-saga/effects';
+import { push } from 'connected-react-router';
 
 import * as api from './api';
 import * as actions from './actions';
@@ -66,6 +67,16 @@ function* callExact(action) {
     }
 }
 
+function* quitGame(action) {
+    try {
+        yield call(api.quitGame, { gameId: action.gameId });
+        yield put(actions.quitGameSuccess());
+        yield put(push('/'));
+    } catch (error) {
+        yield put(actions.quitGameError(error));
+    }
+}
+
 export default function* perudoSaga() {
     yield all([
         takeEvery(actions.DICE_ROLL_STARTED, getDice),
@@ -73,6 +84,7 @@ export default function* perudoSaga() {
         takeEvery(actions.START_GAME, startGame),
         takeEvery(actions.SUBMIT_GUESS, submitGuess),
         takeEvery(actions.CALL_NO, callNo),
-        takeEvery(actions.CALL_EXACT, callExact)
+        takeEvery(actions.CALL_EXACT, callExact),
+        takeEvery(actions.QUIT_GAME, quitGame)
     ]);
 }

@@ -12,27 +12,23 @@ import TableCell from '@material-ui/core/TableCell';
 import TableHead from '@material-ui/core/TableHead';
 import TablePagination from '@material-ui/core/TablePagination';
 import TableRow from '@material-ui/core/TableRow';
-import LockIcon from '@material-ui/icons/Lock';
-import LockOpenIcon from '@material-ui/icons/LockOpen';
 
 import defaultStyles from './JoinGame.module.scss';
 import StyledModal from '../../common/modal/StyledModal';
-import StyledInput from '../../common/StyledInput/StyledInput';
 import StyledButton from '../../common/StyledButton/StyledButton';
 import * as actions from './actions';
 
 const transformData = games => (games ? Object.keys(games).map(key => ({
     id: key,
+    numberOfPlayers: games[key].numberOfPlayers,
     name: games[key].name,
+    gameStarted: games[key].gameStarted ? 'Started' : 'In Lobby',
     creator: games[key].creator.name
 })) : []);
 
 const columns = [
     {
-        id: 'private', label: '', minWidth: 0, align: 'center'
-    },
-    {
-        id: 'players',
+        id: 'numberOfPlayers',
         label: 'Players',
         minWidth: 170,
         align: 'center',
@@ -42,11 +38,10 @@ const columns = [
         id: 'name', label: 'Game Name', minWidth: 170, align: 'center'
     },
     {
-        id: 'mode',
-        label: 'Game Mode',
+        id: 'gameStarted',
+        label: 'Status',
         minWidth: 170,
-        align: 'center',
-        format: value => value.toLocaleString()
+        align: 'center'
     }, {
         id: 'creator', label: 'Creator', minWidth: 100, align: 'center'
     }
@@ -54,7 +49,6 @@ const columns = [
 
 const JoinGame = props => {
     const [joinModalOpen, setJoinModalOpen] = useState(false);
-    const [password, setPassword] = useState(false);
     const [gameToJoin, setGameToJoin] = useState(false);
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -132,26 +126,24 @@ const JoinGame = props => {
                 closeModal={() => setJoinModalOpen(false)}
                 error
                 isOpen={joinModalOpen}
-                headerMessage={`Joining game ${gameToJoin.name} ${gameToJoin.isPrivate ? ('(Private)') : '(Public)'}`}
+                headerMessage={`Joining game ${gameToJoin.name}`}
                 header
                 toggleModal={() => setJoinModalOpen(false)}
             >
                 <div className={props.styles.modalWrapper}>
-                    {gameToJoin.isPrivate ? (
+                    {gameToJoin.gameStarted === 'Started' ? (
                         <div>
-                            To join this private game, please enter the password
-                            <StyledInput label="Password" icon="lock" type="password" onChange={e => setPassword(e)} />
+                            This game has already started, soz
                         </div>
                     )
                         : (
                             <div>
-                                Are you sure you want to join this public game?
+                                Are you sure you want to join this game?
                                 <Link to={`/game/${gameToJoin.id}`}>
                                     <StyledButton text="Join" onClick={() => props.joinGame(gameToJoin.id, gameToJoin.name)} />
                                 </Link>
                             </div>
                         )}
-
                 </div>
             </StyledModal>
         </div>
@@ -171,7 +163,7 @@ JoinGame.propTypes = {
 };
 
 const mapStateToProps = state => {
-    const games = state.firestore.data.available_games;
+    const { games } = state.firestore.data;
     return {
         games
     };
@@ -184,6 +176,6 @@ const mapDispatchToProps = {
 export default compose(
     connect(mapStateToProps, mapDispatchToProps),
     firestoreConnect([{
-        collection: 'available_games'
+        collection: 'games'
     }])
 )(JoinGame);
