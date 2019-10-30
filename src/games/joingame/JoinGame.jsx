@@ -131,7 +131,7 @@ const JoinGame = props => {
                 toggleModal={() => setJoinModalOpen(false)}
             >
                 <div className={props.styles.modalWrapper}>
-                    {gameToJoin.gameStarted ? (
+                    {gameToJoin.gameStarted === 'Started' ? (
                         <div>
                             This game has already started, soz
                         </div>

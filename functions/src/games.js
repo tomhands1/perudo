@@ -9,10 +9,17 @@ exports.createGame = functions
     .https.onCall((data, context) => {
         common.isAuthenticated(context);
 
-        const gameWithThatName = db.collection('games')
+        const gameWithThatName = db
+            .collection('games')
             .where('name', '==', data.name);
 
-        const getDisplayName = id => db.collection('users').doc(id).get().then(user => user.data().displayName);
+        const getDisplayName = id => db
+            .collection('users')
+            .doc(id)
+            .get()
+            .then(
+                user => user.data().displayName
+            );
 
         return getDisplayName(context.auth.uid)
             .then(
@@ -63,11 +70,24 @@ exports.joinGame = functions
     .https.onCall((data, context) => {
         common.isAuthenticated(context);
 
-        const playerInGame = db.collection('games').doc(data.gameId).collection('players').where('id', '==', context.auth.uid);
+        const playerInGame = db
+            .collection('games')
+            .doc(data.gameId)
+            .collection('players')
+            .where('id', '==', context.auth.uid);
 
-        const gameWithThatId = db.collection('games').doc(data.gameId).collection('players');
+        const gameWithThatId = db
+            .collection('games')
+            .doc(data.gameId)
+            .collection('players');
 
-        const getDisplayName = id => db.collection('users').doc(id).get().then(user => user.data().displayName);
+        const getDisplayName = id => db
+            .collection('users')
+            .doc(id)
+            .get()
+            .then(
+                user => user.data().displayName
+            );
 
         return playerInGame
             .get()
@@ -100,7 +120,13 @@ exports.readyUp = functions
     .region('europe-west2')
     .https.onCall((data, context) => {
         common.isAuthenticated(context);
-        const playerInGame = db.collection('games').doc(data.gameId).collection('players').where('id', '==', context.auth.uid);
+
+        const playerInGame = db
+            .collection('games')
+            .doc(data.gameId)
+            .collection('players')
+            .where('id', '==', context.auth.uid);
+
         return playerInGame.get().then(result => {
             if (result.size > 1) {
                 throw new functions.https.HttpsError('invalid-argument', 'You are in that game twice');
@@ -117,7 +143,13 @@ exports.startGame = functions
     .region('europe-west2')
     .https.onCall((data, context) => {
         common.isAuthenticated(context);
-        const playersNotReady = db.collection('games').doc(data.gameId).collection('players').where('readyToPlay', '==', false);
+
+        const playersNotReady = db
+            .collection('games')
+            .doc(data.gameId)
+            .collection('players')
+            .where('readyToPlay', '==', false);
+
         return playersNotReady
             .get()
             .then(
@@ -158,7 +190,11 @@ exports.quitGame = functions
     .https.onCall((data, context) => {
         common.isAuthenticated(context);
 
-        const playerInGame = db.collection('games').doc(data.gameId).collection('players').where('id', '==', context.auth.uid);
+        const playerInGame = db
+            .collection('games')
+            .doc(data.gameId)
+            .collection('players')
+            .where('id', '==', context.auth.uid);
 
         return playerInGame
             .get()
