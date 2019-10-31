@@ -139,6 +139,8 @@ exports.readyUp = functions
         });
     });
 
+const getOrderOfPlay = numberOfPlayers => Array.from(Array(numberOfPlayers).keys()).map(x => x + 1);
+
 exports.startGame = functions
     .region('europe-west2')
     .https.onCall((data, context) => {
@@ -157,16 +159,15 @@ exports.startGame = functions
                     if (result.size > 0) {
                         throw new functions.https.HttpsError('invalid-argument', 'Not all players are ready to play');
                     }
-                    return db.collection('games')
-                        .doc(data.gameId)
-                        .update({
-                            gameStarted: true,
-                            currentBid: {
-                                quantity: 0,
-                                value: 0
-                            },
-                            round: 1
-                        });
+                    return db.collection('games').doc(data.gameId).get().then(game => game.ref.update({
+                        gameStarted: true,
+                        currentBid: {
+                            quantity: 0,
+                            value: 0
+                        },
+                        round: 1,
+                        orderOfPlay: getOrderOfPlay(game.data().numberOfPlayers)
+                    }));
                 }
             ).then(() => db
                 .collection('games')
@@ -184,68 +185,87 @@ exports.startGame = functions
                 ));
     });
 
-
 exports.quitGame = functions
     .region('europe-west2')
     .https.onCall((data, context) => {
         common.isAuthenticated(context);
-
-        const playerInGame = db
+        return db
             .collection('games')
             .doc(data.gameId)
-            .collection('players')
-            .where('id', '==', context.auth.uid);
-
-        return playerInGame
             .get()
             .then(
-                result => {
-                    if (result.size < 1) {
-                        throw new functions.https.HttpsError('not-found', 'You are not in the game');
+                game => {
+                    if (game.data().numberOfPlayers <= 1) {
+                        return db
+                            .collection('games')
+                            .doc(data.gameId)
+                            .collection('allRolls')
+                            .get()
+                            .then(allRolls => allRolls.docs.forEach(x => x.ref.delete()))
+                            .then(() => game.ref.delete());
                     }
-                    if (result.size > 1) {
-                        throw new functions.https.HttpsError('invalid-argument', 'You are in the game multiple times');
+                    if (!game.data().gameStarted) {
+                        if (game.data().creator.id === context.auth.uid) {
+                            db.collection('games').doc(data.gameId).collection('players')
+                                .get()
+                                .then(
+                                    result => {
+                                        const newDocs = result.docs.filter(x => x.data().id !== context.auth.uid);
+
+                                        const newGameOwner = newDocs[0].data();
+                                        db.collection('games').doc(data.gameId).update({
+                                            creator: {
+                                                id: newGameOwner.id,
+                                                name: newGameOwner.name
+                                            }
+                                        });
+                                    }
+                                );
+                        }
+                        return game.ref.update({
+                            numberOfPlayers: admin.firestore.FieldValue.increment(-1)
+                        });
                     }
-                    return result.docs[0].ref.delete();
+                    return db
+                        .collection('games')
+                        .doc(data.gameId)
+                        .collection('players')
+                        .where('id', '==', context.auth.uid)
+                        .get()
+                        .then(
+                            player => {
+                                if (player.size < 1) {
+                                    throw new functions.https.HttpsError('not-found', 'You are not in the game');
+                                }
+                                if (player.size > 1) {
+                                    throw new functions.https.HttpsError('invalid-argument', 'You are in the game multiple times');
+                                }
+                                const { playerNumber } = player.docs[0].data();
+                                return game.ref.update({
+                                    round: admin.firestore.FieldValue.increment(1),
+                                    numberOfPlayers: admin.firestore.FieldValue.increment(-1),
+                                    orderOfPlay: admin.firestore.FieldValue.arrayRemove(playerNumber)
+                                });
+                            }
+                        );
                 }
-            ).then(
-                () => db
-                    .collection('games')
-                    .doc(data.gameId)
-                    .collection('diceRolled')
-                    .where('userId', '==', context.auth.uid)
-                    .get()
-                    .then(
-                        result => {
-                            if (result.size < 1) {
-                                throw new functions.https.HttpsError('not-found', 'You are not in the game');
-                            }
-                            if (result.size > 1) {
-                                throw new functions.https.HttpsError('invalid-argument', 'You are in the game multiple times');
-                            }
-                            return result.docs[0].ref.delete();
-                        }
-                    )
-            ).then(
-                () => db
-                    .collection('games')
-                    .doc(data.gameId).update({
-                        round: admin.firestore.FieldValue.increment(1),
-                        numberOfPlayers: admin.firestore.FieldValue.increment(-1)
-                    })
             )
-            .then(
-                () => db
-                    .collection('games')
-                    .doc(data.gameId)
-                    .get()
-                    .then(
-                        game => {
-                            if (game.data().numberOfPlayers <= 0) {
-                                return game.ref.delete();
-                            }
-                            return Promise.resolve('Not deleted');
-                        }
-                    )
-            );
+            .then(() => db
+                .collection('games')
+                .doc(data.gameId)
+                .collection('diceRolled')
+                .where('userId', '==', context.auth.uid)
+                .get()
+                .then(
+                    query => query.docs.forEach(x => x.ref.delete())
+                ))
+            .then(() => db
+                .collection('games')
+                .doc(data.gameId)
+                .collection('players')
+                .where('id', '==', context.auth.uid)
+                .get()
+                .then(
+                    query => query.docs.forEach(x => x.ref.delete())
+                ));
     });

@@ -1,4 +1,6 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, {
+    useState, useEffect, useCallback, useMemo
+} from 'react';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import fp from 'lodash/fp';
@@ -50,21 +52,21 @@ const PerudoContainer = ({
 
     const leaveGame = useCallback(() => props.quitGame(props.gameId), [props.quitGame, props.gameId]);
 
-    const activePlayer = fp.get('name')(Object.values(props.players).find(x => fp.get('playerNumber')(x) === props.game.activePlayerNum));
+    const activePlayer = useMemo(() => props.players && props.game && fp.get('name')(Object.values(props.players).find(x => fp.get('playerNumber')(x) === props.game.activePlayerNum)));
 
-    const playerNum = fp.get('playerNumber')(Object.values(props.players).find(x => x.id === props.auth.uid));
-    const rolled = fp.get('rolled')(Object.values(props.players).find(x => x.id === props.auth.uid));
+    const playerNum = useMemo(() => props.players && fp.get('playerNumber')(Object.values(props.players).find(x => x.id === props.auth.uid)));
+    const rolled = useMemo(() => props.players && fp.get('rolled')(Object.values(props.players).find(x => x.id === props.auth.uid)));
 
     useEffect(() => {
-        if (props.game.round) {
+        if (props.game && props.game.round) {
             setIsOpen(true);
         }
-    }, [props.game.round]);
+    }, [props.game && props.game.round]);
 
     return (
-        props.numOfDice > 0 ? (
+        props.game && props.numOfDice > 0 ? (
             <div className={styles.perudoContainer}>
-                {props.game.round && (
+                {props.game && props.game.round && (
                     <StyledModal
                         isOpen={isOpen}
                         backdrop
@@ -72,7 +74,7 @@ const PerudoContainer = ({
                         <Rounds startRound={startRound} activePlayer={activePlayer} round={props.game.round} quitGame={leaveGame} />
                     </StyledModal>
                 )}
-                {props.game.gameStarted && (
+                {props.game && props.game.gameStarted && (
                     <div className={styles.gameStarted}>
                         <div className={styles.currentGuess}>
                             {props.game && props.game.currentBid.value > 0

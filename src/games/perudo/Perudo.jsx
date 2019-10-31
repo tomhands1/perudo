@@ -18,7 +18,7 @@ const Perudo = props => {
 
     const readyForRoll = useCallback(() => {
         props.rollDice(props.gameId);
-        setTimeout(() => props.setHidden(false), 300);
+        setTimeout(() => props.setHidden(props.shakerUp), 300);
     }, [props]);
 
     const toggleShaker = useCallback(() => {
@@ -37,9 +37,9 @@ const Perudo = props => {
     return (
         <div className={styles.gameContainer}>
             <Shaker
-                topColor={color.topColor}
-                faceColor={color.faceColor}
-                outlineColor={color.outlineColor}
+                topColor={color && color.topColor}
+                faceColor={color && color.faceColor}
+                outlineColor={color && color.outlineColor}
                 onClick={props.rolled ? toggleShaker : readyForRoll}
                 active={props.rolled && props.shakerUp}
                 rolling={props.rolling}
@@ -47,9 +47,9 @@ const Perudo = props => {
             <div className={styles.insideCup}>
                 <Dice
                     ref={diceRef}
-                    faceColor={color.faceColor}
-                    dotColor={color.dotColor}
-                    outlineColor={color.outlineColor}
+                    faceColor={color && color.faceColor}
+                    dotColor={color && color.dotColor}
+                    outlineColor={color && color.outlineColor}
                     {...props}
                     rollDice={rollDice}
                     hidden={props.hidden}

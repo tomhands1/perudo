@@ -32,7 +32,7 @@ Shaker.defaultProps = {
     faceColor: '#FF6347',
     topColor: '#CF503A',
     outlineColor: '#8B0000',
-    rolling: false
+    active: false
 };
 
 Shaker.propTypes = {
@@ -40,8 +40,7 @@ Shaker.propTypes = {
     faceColor: PropTypes.string,
     topColor: PropTypes.string,
     outlineColor: PropTypes.string,
-    active: PropTypes.bool.isRequired,
-    rolling: PropTypes.bool
+    active: PropTypes.bool
 };
 
 

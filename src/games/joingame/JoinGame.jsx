@@ -157,8 +157,13 @@ JoinGame.defaultProps = {
 };
 
 JoinGame.propTypes = {
-    games: PropTypes.objectOf(PropTypes.shape({})),
-    styles: PropTypes.objectOf(PropTypes.string),
+    games: PropTypes.objectOf(
+        PropTypes.shape({
+        })
+    ),
+    styles: PropTypes.objectOf(
+        PropTypes.string
+    ),
     joinGame: PropTypes.func
 };
 

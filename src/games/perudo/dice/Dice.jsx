@@ -32,13 +32,20 @@ Dice.propTypes = {
     rollDice: PropTypes.func.isRequired,
     hidden: PropTypes.bool.isRequired,
     numOfDice: PropTypes.number.isRequired,
-    faceColor: PropTypes.string.isRequired,
-    dotColor: PropTypes.string.isRequired,
+    faceColor: PropTypes.string,
+    dotColor: PropTypes.string,
     outline: PropTypes.bool.isRequired,
-    outlineColor: PropTypes.string.isRequired,
+    outlineColor: PropTypes.string,
     dieSize: PropTypes.number.isRequired,
     margin: PropTypes.number.isRequired,
-    rolled: PropTypes.bool.isRequired
+    rolled: PropTypes.bool
+};
+
+Dice.defaultProps = {
+    faceColor: '#FF6347',
+    dotColor: '#FFFFFF',
+    outlineColor: '#8B0000',
+    rolled: false
 };
 
 export default Dice;

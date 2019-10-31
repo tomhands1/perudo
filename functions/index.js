@@ -6,3 +6,7 @@ admin.initializeApp(functions.config().firebase);
 exports.auth = require('./src/auth');
 exports.games = require('./src/games');
 exports.perudo = require('./src/perudo');
+
+const common = require('./src/common');
+
+const db = admin.firestore();
