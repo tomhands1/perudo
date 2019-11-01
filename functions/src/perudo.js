@@ -186,7 +186,6 @@ exports.callNo = functions
     .https.onCall((data, context) => {
         common.isAuthenticated(context);
 
-
         const removeDiceFromPlayer = playerNumber => db
             .collection('games')
             .doc(data.gameId)
@@ -196,33 +195,35 @@ exports.callNo = functions
             .then(
                 playerWhoLost => {
                     if (playerWhoLost.size === 0) {
-                        throw new functions.https.HttpsError('not-found', 'NOBODY LOST');
+                        throw new functions.https.HttpsError('not-found', 'Nobody lost');
                     } else if (playerWhoLost.size > 1) {
                         throw new functions.https.HttpsError('invalid-argument', 'Too many people lost');
                     } else {
                         playerWhoLost.docs[0].ref.update({
                             numOfDice: admin.firestore.FieldValue.increment(-1)
-                        });
+                        }).then(
+                            () => {
+                                db
+                                    .collection('games')
+                                    .doc(data.gameId)
+                                    .update({
+                                        activePlayerNum: playerNumber,
+                                        currentBid: {
+                                            playerNumber: null,
+                                            quantity: 0,
+                                            value: 0
+                                        },
+                                        round: admin.firestore.FieldValue.increment(1),
+                                        roundEnded: {
+                                            player: playerWhoLost.docs[0].data().name,
+                                            reason: 'LOST'
+                                        }
+                                    });
+                            }
+                        );
                     }
                 }
-            )
-            .then(
-                () => {
-                    db
-                        .collection('games')
-                        .doc(data.gameId)
-                        .update({
-                            activePlayerNum: playerNumber,
-                            currentBid: {
-                                playerNumber: null,
-                                quantity: 0,
-                                value: 0
-                            },
-                            round: admin.firestore.FieldValue.increment(1)
-                        });
-                }
             );
-
 
         return db
             .collection('games')
@@ -306,7 +307,11 @@ exports.callExact = functions
                                 quantity: 0,
                                 value: 0
                             },
-                            round: admin.firestore.FieldValue.increment(1)
+                            round: admin.firestore.FieldValue.increment(1),
+                            roundEnded: {
+                                player: playerWhoCalled.docs[0].data().name,
+                                reason: increment > 0 ? 'EXACT' : 'NOT_EXACT'
+                            }
                         });
                 }
             );

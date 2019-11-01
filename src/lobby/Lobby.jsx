@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import fp from 'lodash/fp';
 
 import Paper from '@material-ui/core/Paper';
 import Table from '@material-ui/core/Table';
@@ -53,18 +54,18 @@ const columns = [
 ];
 
 const Lobby = ({
-    players, styles, userId, readyUp, activePlayer, gameStarted
+    styles, userId, readyUp, activePlayer, gameStarted, ...props
 }) => {
     const transformData = players => (players ? Object.keys(players).map(key => ({
         id: key,
         name: players[key].name || players[key].id,
         numOfDice: players[key].numOfDice,
-        readyToPlay: players[key].readyToPlay ? <Tick /> : <StyledButton text="Ready?" disabled={players[key].id !== userId} onClick={readyUp} />,
+        readyToPlay: players[key].readyToPlay ? <Tick /> : <StyledButton text="Ready?" size="sm" disabled={players[key].id !== userId} onClick={readyUp} />,
         rolled: players[key].rolled ? <Tick /> : <Cross />,
         active: players[key].playerNumber === activePlayer ? <div className={styles.activeLED} /> : ''
     })) : []);
 
-    const playersTable = transformData(players);
+    const playersTable = transformData(props.players);
 
     return (
         <div className={styles.lobbyWrapper}>
@@ -107,12 +108,20 @@ const Lobby = ({
 
 Lobby.defaultProps = {
     players: {},
-    styles: defaultStyles
+    styles: defaultStyles,
+    userId: '',
+    readyUp: fp.noop,
+    activePlayer: 1,
+    gameStarted: false
 };
 
 Lobby.propTypes = {
     players: PropTypes.objectOf(PropTypes.shape({})),
-    styles: PropTypes.objectOf(PropTypes.string)
+    styles: PropTypes.objectOf(PropTypes.string),
+    userId: PropTypes.string,
+    readyUp: PropTypes.func,
+    activePlayer: PropTypes.number,
+    gameStarted: PropTypes.bool
 };
 
 export default Lobby;

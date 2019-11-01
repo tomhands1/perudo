@@ -3,19 +3,15 @@ import fp from 'lodash/fp';
 import * as actions from './actions';
 
 const initState = {
-    guess: { quantity: 0, value: 0, lastDice: false },
+    guess: { quantity: 0, value: 0 },
     numOfDice: 5,
     diceArray: [],
     shakerUp: false,
-    diceFetched: false,
-    isReady: ''
+    diceFetched: false
 };
 
 const perudoReducer = (state = initState, action) => {
     switch (action.type) {
-    case actions.RESTART_GAME: {
-        return fp.set('numOfDice', initState.numOfDice)(state);
-    }
     case actions.NEW_ROUND: {
         return fp.set('shakerUp', false)(state);
     }
@@ -32,18 +28,6 @@ const perudoReducer = (state = initState, action) => {
     }
     case actions.TOGGLE_SHAKER: {
         return fp.set('shakerUp', !state.shakerUp)(state);
-    }
-    case actions.READY_TO_PLAY: {
-        return fp.set('isReady', 'PREPARING')(state);
-    }
-    case actions.READY_UP_SUCCESS: {
-        return fp.set('isReady', 'READY')(state);
-    }
-    case actions.READY_UP_ERROR: {
-        return fp.flow(
-            fp.set('isReady', 'ERROR'),
-            fp.set('readyUpError', action.errorMessage),
-        )(state);
     }
     default:
         return state;

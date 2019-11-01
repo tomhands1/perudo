@@ -43,7 +43,7 @@ function* submitGuess(action) {
                 value: action.value
             }
         });
-        yield put(actions.submitGuessSuccess());
+        yield put(actions.submitGuessSuccess({ quantity: action.quantity, value: action.value }));
     } catch (error) {
         yield put(actions.submitGuessError(error));
     }

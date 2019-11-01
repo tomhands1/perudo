@@ -10,6 +10,7 @@ const StyledButton = props => (
         className={props.styles.styledButton}
         onClick={props.onClick}
         type={props.type}
+        outline={props.outline}
         disabled={props.disabled}
         size={props.size}
         floating={props.floating}
@@ -26,7 +27,8 @@ StyledButton.defaultProps = {
     type: '',
     disabled: false,
     size: '',
-    floating: false
+    floating: false,
+    outline: false
 };
 
 StyledButton.propTypes = {
@@ -37,7 +39,8 @@ StyledButton.propTypes = {
     type: PropTypes.string,
     disabled: PropTypes.bool,
     size: PropTypes.string,
-    floating: PropTypes.bool
+    floating: PropTypes.bool,
+    outline: PropTypes.bool
 };
 
 export default StyledButton;

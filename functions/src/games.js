@@ -146,30 +146,35 @@ exports.startGame = functions
     .https.onCall((data, context) => {
         common.isAuthenticated(context);
 
-        const playersNotReady = db
+        return db
             .collection('games')
             .doc(data.gameId)
             .collection('players')
-            .where('readyToPlay', '==', false);
-
-        return playersNotReady
+            .where('readyToPlay', '==', false)
             .get()
             .then(
                 result => {
                     if (result.size > 0) {
                         throw new functions.https.HttpsError('invalid-argument', 'Not all players are ready to play');
                     }
-                    return db.collection('games').doc(data.gameId).get().then(game => game.ref.update({
-                        gameStarted: true,
-                        currentBid: {
-                            quantity: 0,
-                            value: 0
-                        },
-                        round: 1,
-                        orderOfPlay: getOrderOfPlay(game.data().numberOfPlayers)
-                    }));
+                    return db
+                        .collection('games')
+                        .doc(data.gameId)
+                        .get()
+                        .then(
+                            game => game.ref.update({
+                                gameStarted: true,
+                                currentBid: {
+                                    quantity: 0,
+                                    value: 0
+                                },
+                                round: 1,
+                                orderOfPlay: getOrderOfPlay(game.data().numberOfPlayers)
+                            })
+                        );
                 }
-            ).then(() => db
+            )
+            .then(() => db
                 .collection('games')
                 .doc(data.gameId)
                 .collection('players')
@@ -189,6 +194,15 @@ exports.quitGame = functions
     .region('europe-west2')
     .https.onCall((data, context) => {
         common.isAuthenticated(context);
+
+        const getDisplayName = id => db
+            .collection('users')
+            .doc(id)
+            .get()
+            .then(
+                user => user.data().displayName
+            );
+
         return db
             .collection('games')
             .doc(data.gameId)
@@ -211,14 +225,16 @@ exports.quitGame = functions
                                 .then(
                                     result => {
                                         const newDocs = result.docs.filter(x => x.data().id !== context.auth.uid);
-
                                         const newGameOwner = newDocs[0].data();
-                                        db.collection('games').doc(data.gameId).update({
-                                            creator: {
-                                                id: newGameOwner.id,
-                                                name: newGameOwner.name
-                                            }
-                                        });
+                                        db
+                                            .collection('games')
+                                            .doc(data.gameId)
+                                            .update({
+                                                creator: {
+                                                    id: newGameOwner.id,
+                                                    name: newGameOwner.name
+                                                }
+                                            });
                                     }
                                 );
                         }
@@ -244,7 +260,11 @@ exports.quitGame = functions
                                 return game.ref.update({
                                     round: admin.firestore.FieldValue.increment(1),
                                     numberOfPlayers: admin.firestore.FieldValue.increment(-1),
-                                    orderOfPlay: admin.firestore.FieldValue.arrayRemove(playerNumber)
+                                    orderOfPlay: admin.firestore.FieldValue.arrayRemove(playerNumber),
+                                    roundEnded: {
+                                        player: getDisplayName(context.auth.uid),
+                                        reason: 'QUIT'
+                                    }
                                 });
                             }
                         );

@@ -6,41 +6,38 @@ import StyledButton from '../../../common/StyledButton/StyledButton';
 import styles from './Rounds.module.scss';
 
 const Rounds = props => (
-    props.round === 1 ? (
-        <div className={styles.roundsContainer}>
-            <div className={styles.headerContainer}>{`${props.activePlayer} to bid first!`}</div>
-            <div className={styles.secondaryHeader}>Are you ready to play Perudo?</div>
-            <div className={styles.buttonContainer}>
-                <StyledButton onClick={props.startRound} text="Yes" color="green" />
-            </div>
+    <div className={styles.roundsContainer}>
+        <div className={styles.primaryMessage}>
+            {props.primaryMessage}
         </div>
-    ) : (
-        <div className={styles.roundsContainer}>
-            <div className={styles.headerContainer}>
-                {`${props.activePlayer} lost a dice!`}
-                <div className={styles.primaryHeader}>
-                    {`${props.activePlayer} starts the next round`}
-                </div>
-            </div>
-            <div className={styles.secondaryHeader}>Are you ready to start the next round?</div>
-            <div className={styles.buttonContainer}>
-                <StyledButton onClick={props.startRound} text="Yes" color="green" />
-            </div>
+        <div className={styles.secondaryMessage}>
+            {props.secondaryMessage}
         </div>
-    )
+        <div className={styles.buttonContainer}>
+            <StyledButton onClick={props.negativeAction} outline text={props.negativeText} color="red" />
+            <StyledButton onClick={props.positiveAction} text={props.positiveText} color="green" />
+        </div>
+    </div>
+
 );
 
+
 Rounds.propTypes = {
-    activePlayer: PropTypes.string,
-    startRound: PropTypes.func,
-    quitGame: PropTypes.func,
-    round: PropTypes.number.isRequired
+    positiveText: PropTypes.string,
+    negativeText: PropTypes.string,
+    primaryMessage: PropTypes.string,
+    secondaryMessage: PropTypes.string,
+    positiveAction: PropTypes.func,
+    negativeAction: PropTypes.func
 };
 
 Rounds.defaultProps = {
-    activePlayer: '',
-    startRound: fp.noop,
-    quitGame: fp.noop
+    positiveText: '',
+    negativeText: '',
+    primaryMessage: '',
+    secondaryMessage: '',
+    positiveAction: fp.noop,
+    negativeAction: fp.noop
 };
 
 export default Rounds;

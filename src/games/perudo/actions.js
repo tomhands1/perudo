@@ -6,9 +6,6 @@ export const CALL_EXACT = 'CALL_EXACT';
 export const CALL_EXACT_SUCCESS = 'CALL_EXACT_SUCCESS';
 export const CALL_EXACT_ERROR = 'CALL_EXACT_ERROR';
 
-export const INCREASE_DICE = 'INCREASE_DICE';
-export const RESTART_GAME = 'RESTART_GAME';
-
 export const TOGGLE_SHAKER = 'TOGGLE_SHAKER';
 
 export const SUBMIT_GUESS = 'SUBMIT_GUESS';
@@ -33,9 +30,10 @@ export const QUIT_GAME = 'QUIT_GAME';
 export const QUIT_GAME_SUCCESS = 'QUIT_GAME_SUCCESS';
 export const QUIT_GAME_ERROR = 'QUIT_GAME_ERROR';
 
-export const callNo = gameId => ({
+export const callNo = (gameId, bid) => ({
     type: CALL_NO,
-    gameId
+    gameId,
+    bid
 });
 
 export const callNoSuccess = () => ({
@@ -47,9 +45,10 @@ export const callNoError = error => ({
     error
 });
 
-export const callExact = gameId => ({
+export const callExact = (gameId, bid) => ({
     type: CALL_EXACT,
-    gameId
+    gameId,
+    bid
 });
 
 export const callExactSuccess = () => ({
@@ -63,10 +62,6 @@ export const callExactError = error => ({
 
 export const newRound = () => ({
     type: NEW_ROUND
-});
-
-export const restartGame = () => ({
-    type: RESTART_GAME
 });
 
 export const diceRollStarted = gameId => ({

@@ -37,11 +37,10 @@ const PerudoContainer = ({
         return isHigherBid(props.game.currentBid, bid) ? submitGuess(quantity, value, props.gameId) : alert('invalid guess');
     }, [quantity, value, submitGuess, props.gameId]);
 
-    const callNo = useCallback(() => props.callNo(props.gameId), [props.callNo, props.gameId]);
-    const callExact = useCallback(() => props.callExact(props.gameId), [props.callExact, props.gameId]);
+    const callNo = useCallback(() => props.callNo(props.gameId, props.game.currentBid), [props.callNo, props.gameId]);
+    const callExact = useCallback(() => props.callExact(props.gameId, props.game.currentBid), [props.callExact, props.gameId]);
 
     const readyUp = useCallback(() => props.readyToPlay(props.gameId), [props.readyToPlay, props.gameId]);
-
     const startGame = useCallback(() => props.startGame(props.gameId), [props.startGame, props.gameId]);
     const startRound = useCallback(() => {
         setIsOpen(false);
@@ -49,10 +48,32 @@ const PerudoContainer = ({
         props.newRound();
     },
     [props.startGame, props.gameId]);
-
     const leaveGame = useCallback(() => props.quitGame(props.gameId), [props.quitGame, props.gameId]);
 
-    const activePlayer = useMemo(() => props.players && props.game && fp.get('name')(Object.values(props.players).find(x => fp.get('playerNumber')(x) === props.game.activePlayerNum)));
+    const activePlayer = useMemo(() => props.players && props.game && fp.get('name')(Object.values(props.players).find(x => x.playerNumber === props.game.activePlayerNum)));
+    const primaryMessage = useMemo(() => {
+        if (props.game) {
+            if (props.game.round === 1) {
+                return 'Are you ready to play Perudo?';
+            }
+            if (props.game.roundEnded) {
+                if (props.game.roundEnded.reason === 'EXACT') {
+                    return `${activePlayer} correctly called exact`;
+                }
+                if (props.game.roundEnded.reason === 'NOT_EXACT') {
+                    return `${activePlayer} incorrectly called exact`;
+                }
+                if (props.game.roundEnded.reason === 'LOST') {
+                    return `${activePlayer} lost a dice`;
+                }
+                if (props.game.roundEnded.reason === 'QUIT') {
+                    return `${props.game.roundEnded.player} rage quit, what a dickhead`;
+                }
+            }
+        }
+        return '';
+    });
+    const secondaryMessage = useMemo(() => props.game && `${activePlayer} to roll ${props.game.round === 1 ? 'first' : 'next'}`);
 
     const playerNum = useMemo(() => props.players && fp.get('playerNumber')(Object.values(props.players).find(x => x.id === props.auth.uid)));
     const rolled = useMemo(() => props.players && fp.get('rolled')(Object.values(props.players).find(x => x.id === props.auth.uid)));
@@ -71,7 +92,14 @@ const PerudoContainer = ({
                         isOpen={isOpen}
                         backdrop
                     >
-                        <Rounds startRound={startRound} activePlayer={activePlayer} round={props.game.round} quitGame={leaveGame} />
+                        <Rounds
+                            positiveAction={startRound}
+                            negativeAction={leaveGame}
+                            positiveText={props.game.round === 1 ? 'Yes' : 'Continue'}
+                            negativeText="Quit"
+                            primaryMessage={primaryMessage}
+                            secondaryMessage={secondaryMessage}
+                        />
                     </StyledModal>
                 )}
                 {props.game && props.game.gameStarted && (
@@ -113,7 +141,8 @@ const PerudoContainer = ({
                                 <StyledButton
                                     onClick={callNo}
                                     text="No"
-                                    color="danger"
+                                    color="red"
+                                    rounded
                                 />
                             )}
                         <StyledButton
@@ -121,6 +150,7 @@ const PerudoContainer = ({
                             text="Exact"
                             color="green"
                             disabled={props.numOfDice > 4}
+                            rounded
                         />
 
                     </div>
@@ -145,7 +175,7 @@ const PerudoContainer = ({
             : (
                 <div className={styles.perudoContainer}>
                     Unlucky Scrub
-                    <StyledButton onClick={restartGame} text="Play Again!" />
+                    <StyledButton onClick={leaveGame} text="Home" color="red" size="sm" />
                 </div>
             )
     );
@@ -183,7 +213,11 @@ PerudoContainer.propTypes = {
             quantity: PropTypes.number,
             value: PropTypes.number
         }),
-        round: PropTypes.number
+        round: PropTypes.number,
+        roundEnded: PropTypes.shape({
+            player: PropTypes.string,
+            reason: PropTypes.string
+        })
     }),
     players: PropTypes.objectOf(
         PropTypes.shape({
@@ -235,7 +269,11 @@ PerudoContainer.defaultProps = {
             quantity: 0,
             value: 0
         },
-        round: 1
+        round: 1,
+        roundEnded: {
+            player: '',
+            reason: ''
+        }
     },
     players: {
         '': {
@@ -259,7 +297,6 @@ const mapDispatchToProps = {
     rollDice: actions.diceRollStarted,
     callNo: actions.callNo,
     callExact: actions.callExact,
-    restartGame: actions.restartGame,
     toggleShaker: actions.toggleShaker,
     readyToPlay: actions.readyToPlay,
     startGame: actions.startGame,
@@ -279,7 +316,8 @@ const mapStateToProps = (state, props) => ({
     rolling: getRolling(state),
     isReady: state.perudo.isReady,
     diceRolled: getRolls(state),
-    diceFetched: state.perudo.diceFetched
+    diceFetched: state.perudo.diceFetched,
+    bid: state.perudo.guess
 });
 
 
